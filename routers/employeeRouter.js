@@ -1,5 +1,5 @@
 import express from 'express';
-import { fetchAttendanceSummary, postAttendance, getEmployeeById, updateEmployeeData, getAllAttendancesFilterByDate } from '../controllers/employeeController.js';
+import { fetchAttendanceSummary, postAttendance, getEmployeeById, updateEmployeeData, getAllAttendancesFilterByDate, login } from '../controllers/employeeController.js';
 
 const router = express.Router();
 
@@ -13,4 +13,5 @@ router.put('/employees/:id', updateEmployeeData);
 
 router.get('/attendances', getAllAttendancesFilterByDate);
 
+router.post('/login', login);
 export default router;

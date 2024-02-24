@@ -114,4 +114,22 @@ async function getAllAttendancesFilterByDateService(startDate, endDate, employee
       throw new Error(error);
   }
 }
-export { getAttendanceSummary, postAttendanceService, getEmployeeByIdService, updateEmployeeDataService, getAllAttendancesFilterByDateService };
+
+async function loginService(email, password) {
+  try {
+    const employee = await Employee.findOne({ where: { email } });
+
+    if (!employee) {
+      throw new Error('Employee not found');
+    }
+
+    if (employee.password !== password) {
+      throw new Error('Invalid password');
+    }
+
+    return employee;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+export { getAttendanceSummary, postAttendanceService, getEmployeeByIdService, updateEmployeeDataService, getAllAttendancesFilterByDateService, loginService };

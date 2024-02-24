@@ -1,4 +1,4 @@
-import { getAttendanceSummary, postAttendanceService, getEmployeeByIdService, updateEmployeeDataService, getAllAttendancesFilterByDateService } from '../services/employeeService.js';
+import { getAttendanceSummary, postAttendanceService, getEmployeeByIdService, updateEmployeeDataService, getAllAttendancesFilterByDateService, loginService } from '../services/employeeService.js';
 
 const fetchAttendanceSummary = async (req, res) => {
   try {
@@ -56,4 +56,14 @@ async function getAllAttendancesFilterByDate(req, res, next) {
       res.status(500).json({ success: false, message: 'Failed to fetch attendances', error: error.message });
   }
 }
-export { fetchAttendanceSummary, postAttendance,  getEmployeeById, updateEmployeeData, getAllAttendancesFilterByDate};
+
+async function login(req, res) {
+  try {
+      const { email, password } = req.body;
+      const employee = await loginService(email, password);
+      res.status(200).json({ success: true, data: employee });
+  } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+  }
+}
+export { fetchAttendanceSummary, postAttendance,  getEmployeeById, updateEmployeeData, getAllAttendancesFilterByDate, login};
