@@ -1,6 +1,7 @@
 import Attendance from '../models/attendanceModel.js';
 import { Op } from 'sequelize';
 import Employee from '../models/employeeModel.js';
+import {sendMessage} from '../kafkaConfig/kafkaProducerConfig.js';
 
 const getAttendanceSummary = async (employeeId, startDate, endDate) => {
   try {
@@ -73,6 +74,7 @@ async function updateEmployeeDataService(employeeId, oldPassword, newData) {
           throw new Error('Old password is incorrect');
       }
       await employee.update(newData);
+      await sendMessage('data_test', employee.name + " has change their data");
       return employee;
   } catch (error) {
       throw new Error(error.message);
