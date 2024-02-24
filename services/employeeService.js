@@ -88,42 +88,25 @@ async function getAllAttendancesFilterByDateService(startDate, endDate, employee
       if (!endDate) {
         endDate = new Date();
       }
-      let attendances
-      if (employeeId == '') {
-        console.log('masik')
-
-          attendances = await Attendance.findAll({
-          include: {
-            model: Employee,
-            attributes: ['name', 'email']
+      const filterOptions = {
+        where: {
+          arrivalDate: {
+            [Op.between]: [startDate, endDate]
           },
-          where: {
-            arrivalDate: {
-              [Op.between]: [startDate, endDate]
-            },
-            departureDate: {
-              [Op.between]: [startDate, endDate]
-            }
+          departureDate: {
+            [Op.between]: [startDate, endDate]
           }
-        });
-      } else {
-        attendances = await Attendance.findByPk({
-          include: {
-            model: Employee,
-            attributes: ['name', 'email']
-          },
-          where: {
-            arrivalDate: {
-              [Op.between]: [startDate, endDate]
-            },
-            departureDate: {
-              [Op.between]: [startDate, endDate]
-            },
-            EmployeeId: employeeId
-          }
-        });
+        }
       }
-
+      if (employeeId != '') {
+        filterOptions.where.EmployeeId = employeeId;
+      }
+      const attendances = await Attendance.findAll(filterOptions, {
+        include: {
+          model: Employee,
+          attributes: ['name', 'email']
+        }
+      });
       return attendances;
   } catch (error) {
       throw new Error(error);
