@@ -34,7 +34,11 @@ const Employee = db.define('Employee', {
       password: {
         type: DataTypes.STRING,
         allowNull: false
-      }
+      }, 
+      role: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
 }, {freezeTableName: true
 });
 
