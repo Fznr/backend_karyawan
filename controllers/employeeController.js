@@ -3,7 +3,8 @@ import { getAttendanceSummary, postAttendanceService, getEmployeeByIdService, up
 const fetchAttendanceSummary = async (req, res) => {
   try {
     const { id } = req.params;
-    const { startDate, endDate } = req.body;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
 
     const attendanceSummary = await getAttendanceSummary(id, startDate, endDate);
 

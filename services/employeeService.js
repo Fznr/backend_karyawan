@@ -17,16 +17,29 @@ const getAttendanceSummary = async (employeeId, startDate, endDate) => {
     const attendanceSummary = await Attendance.findAll({
       include: {
         model: Employee,
-        attributes: ['name', 'email']
+        attributes: ['name', 'email', 'photo']
       },
       where: {
         EmployeeId: employeeId,
-        arrivalDate: {
-          [Op.between]: [startDate, endDate]
-        },
-        departureDate: {
-          [Op.between]: [startDate, endDate]
-        }
+        [Op.and]: [
+          {
+            arrivalDate: {
+              [Op.between]: [startDate, endDate]
+            }
+          },
+          {
+            [Op.or]: [
+              {
+                departureDate: {
+                  [Op.between]: [startDate, endDate]
+                }
+              },
+              {
+                departureDate: null
+              }
+            ]
+          }
+        ]
       }
     });
 
@@ -38,16 +51,40 @@ const getAttendanceSummary = async (employeeId, startDate, endDate) => {
 
 async function postAttendanceService(employeeId, arrivalDate, arrivalTime, arrivalStatus, departureDate, departureTime) {
   try {
-      const attendance = await Attendance.create({
+    let attendance = await Attendance.findOne({
+      where: {
+        EmployeeId: employeeId,
+        arrivalDate: arrivalDate
+      }
+    });
+
+    if (attendance) {
+      console.log('masuk')
+      // Jika data absensi sudah ada, lakukan pembaruan
+      attendance = await Attendance.update({
+        arrivalStatus: arrivalStatus,
+        departureDate: departureDate,
+        departureTime: departureTime
+      }, {
+        where: {
+          EmployeeId: employeeId,
+          arrivalDate: arrivalDate
+        }
+      });
+    } else {
+      // Jika data absensi belum ada, buat entri baru
+      attendance = await Attendance.create({
         arrivalDate: arrivalDate,
         arrivalTime: arrivalTime,
         arrivalStatus: arrivalStatus,
         departureDate: departureDate,
         departureTime: departureTime,
-        EmployeeId: employeeId,
+        EmployeeId: employeeId
       });
+    }
       return attendance;
   } catch (error) {
+     console.log(error)
       throw new Error(error);
   }
 }
@@ -70,7 +107,7 @@ async function updateEmployeeDataService(employeeId, oldPassword, newData) {
       if (!employee) {
           throw new Error('Employee not found');
       }
-      if (employee.password !== oldPassword) {
+      if (oldPassword && employee.password !== oldPassword) {
           throw new Error('Old password is incorrect');
       }
       await employee.update(newData);
@@ -91,24 +128,37 @@ async function getAllAttendancesFilterByDateService(startDate, endDate, employee
         endDate = new Date();
       }
       const filterOptions = {
+        include: {
+          model: Employee,
+          attributes: ['name', 'email']
+        },
         where: {
-          arrivalDate: {
-            [Op.between]: [startDate, endDate]
-          },
-          departureDate: {
-            [Op.between]: [startDate, endDate]
-          }
+          [Op.and]: [
+            {
+              arrivalDate: {
+                [Op.between]: [startDate, endDate]
+              }
+            },
+            {
+              [Op.or]: [
+                {
+                  departureDate: {
+                    [Op.between]: [startDate, endDate]
+                  }
+                },
+                {
+                  departureDate: null
+                }
+              ]
+            }
+          ]
         }
       }
       if (employeeId != '') {
         filterOptions.where.EmployeeId = employeeId;
       }
-      const attendances = await Attendance.findAll(filterOptions, {
-        include: {
-          model: Employee,
-          attributes: ['name', 'email']
-        }
-      });
+      const attendances = await Attendance.findAll(filterOptions);
+      console.log(attendances)
       return attendances;
   } catch (error) {
       throw new Error(error);

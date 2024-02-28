@@ -26,7 +26,7 @@ const Employee = db.define('Employee', {
         allowNull: false
       },
       photo: {
-        type: DataTypes.BLOB
+        type: DataTypes.TEXT
       },
       phoneNumber: {
         type: DataTypes.STRING
